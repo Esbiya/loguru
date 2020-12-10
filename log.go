@@ -216,10 +216,12 @@ func (bl *MyLogger) writeMsg(logLevel int, msg string, v ...interface{}) error {
 		bl.loggerFuncCallDepth = 3
 		_ = bl.setLogger(AdapterConsole)
 	case 2:
-		configBytes, _ := ioutil.ReadFile("file.json")
+		executePath, _ := os.Getwd()
+		configBytes, _ := ioutil.ReadFile(executePath + "/logs/file.json")
 		_ = bl.setLogger(AdapterFile, string(configBytes))
 	case 3:
-		configBytes, _ := ioutil.ReadFile("online.json")
+		executePath, _ := os.Getwd()
+		configBytes, _ := ioutil.ReadFile(executePath + "/logs/online.json")
 		_ = bl.setLogger(AdapterOnline, string(configBytes))
 	}
 	bl.lock.Unlock()
