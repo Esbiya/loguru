@@ -221,6 +221,7 @@ func (bl *MyLogger) writeMsg(logLevel int, msg string, v ...interface{}) error {
 		_ = bl.setLogger(AdapterFile, string(configBytes))
 	case 3:
 		executePath, _ := os.Getwd()
+		log.Println(executePath)
 		configBytes, _ := ioutil.ReadFile(executePath + "/logs/online.json")
 		_ = bl.setLogger(AdapterOnline, string(configBytes))
 	}
