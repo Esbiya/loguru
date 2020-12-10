@@ -2,6 +2,7 @@ package loguru
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -28,19 +29,22 @@ const levelLoggerImpl = -1
 const (
 	AdapterConsole   = "console"
 	AdapterFile      = "file"
+	AdapterOnline    = "online"
 	AdapterMultiFile = "multifile"
 	AdapterMail      = "smtp"
 	AdapterConn      = "conn"
-	AdapterEs        = "es"
-	AdapterJianLiao  = "jianliao"
-	AdapterSlack     = "slack"
-	AdapterAliLS     = "alils"
 )
 
 const (
 	LevelInfo  = LevelInformational
 	LevelTrace = LevelDebug
 	LevelWarn  = LevelWarning
+)
+
+const (
+	Console    = 1
+	OnlineLog  = 2
+	Write2File = 3
 )
 
 type newLoggerFunc func() Logger
@@ -51,7 +55,6 @@ type Logger interface {
 	Destroy()
 	Flush()
 	SetFormatter(f LogFormatter)
-	SetOnlineLogger(o OnlineLogger)
 }
 
 var adapters = make(map[string]newLoggerFunc)
@@ -72,6 +75,7 @@ type MyLogger struct {
 	lock                sync.Mutex
 	level               int
 	init                bool
+	mode                int
 	enableFuncCallDepth bool
 	loggerFuncCallDepth int
 	asynchronous        bool
@@ -81,7 +85,6 @@ type MyLogger struct {
 	signalChan          chan string
 	wg                  sync.WaitGroup
 	outputs             []*nameLogger
-	onlineLogHost       string
 }
 
 const defaultAsyncMsgLen = 1e3
@@ -93,11 +96,12 @@ type nameLogger struct {
 
 var logMsgPool *sync.Pool
 
-func NewLogger(channelLens ...int64) *MyLogger {
+func NewLogger(mode int, channelLens ...int64) *MyLogger {
 	bl := new(MyLogger)
+	bl.mode = mode
 	bl.level = LevelDebug
 	bl.enableFuncCallDepth = true
-	bl.loggerFuncCallDepth = 3
+	bl.loggerFuncCallDepth = 2
 	bl.msgChanLen = append(channelLens, 0)[0]
 	if bl.msgChanLen <= 0 {
 		bl.msgChanLen = defaultAsyncMsgLen
@@ -195,11 +199,9 @@ func (bl *MyLogger) Write(p []byte) (n int, err error) {
 	if len(p) == 0 {
 		return 0, nil
 	}
-	// writeMsg will always add a '\n' character
 	if p[len(p)-1] == '\n' {
 		p = p[0 : len(p)-1]
 	}
-	// set levelLoggerImpl to ensure all log message will be write out
 	err = bl.writeMsg(levelLoggerImpl, string(p))
 	if err == nil {
 		return len(p), err
@@ -208,11 +210,19 @@ func (bl *MyLogger) Write(p []byte) (n int, err error) {
 }
 
 func (bl *MyLogger) writeMsg(logLevel int, msg string, v ...interface{}) error {
-	if !bl.init {
-		bl.lock.Lock()
+	bl.lock.Lock()
+	switch bl.mode {
+	case 1:
+		bl.loggerFuncCallDepth = 3
 		_ = bl.setLogger(AdapterConsole)
-		bl.lock.Unlock()
+	case 2:
+		configBytes, _ := ioutil.ReadFile("file.json")
+		_ = bl.setLogger(AdapterFile, string(configBytes))
+	case 3:
+		configBytes, _ := ioutil.ReadFile("online.json")
+		_ = bl.setLogger(AdapterOnline, string(configBytes))
 	}
+	bl.lock.Unlock()
 
 	if len(v) > 0 {
 		msg = fmt.Sprintf(msg, v...)
@@ -420,7 +430,7 @@ func (bl *MyLogger) flush() {
 	}
 }
 
-var logger = NewLogger()
+var logger = NewLogger(1)
 
 func GetLgLogger() *MyLogger {
 	return logger
@@ -552,4 +562,12 @@ func formatLog(f interface{}, v ...interface{}) string {
 		msg += strings.Repeat(" %v", len(v))
 	}
 	return fmt.Sprintf(msg, v...)
+}
+
+func DelLogger(name string) error {
+	err := logger.DelLogger(name)
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -1,29 +1,69 @@
 package loguru
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
+	"sync"
 )
 
 type OnlineLogger struct {
-	conn          net.Conn
-	app           string
-	onlineLogHost string
+	sync.Mutex
+	conn      net.Conn
+	Host      string `json:"host"`
+	App       string `json:"app"`
+	Formatter string `json:"formatter"`
+	formatter LogFormatter
 }
 
-func NewOnlineLogger(host, app string) (*OnlineLogger, error) {
-	c, err := net.Dial("tcp", host)
+func (o *OnlineLogger) Format(lm *LogMsg) string {
+	msg := lm.NormalFormat()
+	hd, _, _ := formatTimeHeader(lm.When)
+	msg = fmt.Sprintf("%s %s\n", string(hd), msg)
+	return msg
+}
+
+func (o *OnlineLogger) Init(config string) error {
+	err := json.Unmarshal([]byte(config), o)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return &OnlineLogger{
-		conn:          c,
-		app:           app,
-		onlineLogHost: host,
-	}, nil
+	c, err := net.Dial("tcp", o.Host)
+	if err != nil {
+		return err
+	}
+	o.conn = c
+	return err
 }
 
-func (o *OnlineLogger) DisplayLogOnline(level, msg string) {
-	message := append([]byte(fmt.Sprintf("+msg|%s|%s|%s", o.app, level, msg)), 0)
-	_, _ = o.conn.Write(message)
+func (o *OnlineLogger) WriteMsg(lm *LogMsg) error {
+	msg := o.formatter.Format(lm)
+	message := append([]byte(fmt.Sprintf("+msg|%s|%s|%s", o.App, levelNames[lm.Level], msg)), 0)
+	_, err := o.conn.Write(message)
+	return err
+}
+
+func (o *OnlineLogger) SetFormatter(f LogFormatter) {
+	o.formatter = f
+}
+
+func (o *OnlineLogger) Destroy() {
+	_ = o.conn.Close()
+}
+
+func (o *OnlineLogger) Flush() {
+	for _, level := range levelNames {
+		message := append([]byte(fmt.Sprintf("-input|%s|%s", o.App, level)))
+		_, _ = o.conn.Write(message)
+	}
+}
+
+func NewOnlineLogger() Logger {
+	cw := &OnlineLogger{}
+	cw.formatter = cw
+	return cw
+}
+
+func init() {
+	Register(AdapterOnline, NewOnlineLogger)
 }

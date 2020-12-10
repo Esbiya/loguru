@@ -19,7 +19,7 @@ type LogMsg struct {
 	enableFuncCallDepth bool
 }
 
-func (lm *LogMsg) OldStyleFormat() string {
+func (lm *LogMsg) ColorStyleFormat() string {
 	msg := lm.Msg
 
 	if len(lm.Args) > 0 {
@@ -53,5 +53,24 @@ func (lm *LogMsg) OldStyleFormat() string {
 	}
 
 	msg = levelPrefix[lm.Level] + " " + msg
+	return msg
+}
+
+func (lm *LogMsg) NormalFormat() string {
+	msg := lm.Msg
+
+	if len(lm.Args) > 0 {
+		lm.Msg = fmt.Sprintf(lm.Msg, lm.Args...)
+	}
+
+	if lm.enableFuncCallDepth {
+		filePath := lm.FilePath
+		if !lm.enableFullFilePath {
+			_, filePath = path.Split(filePath)
+		}
+		msg = fmt.Sprintf("[%s:%d] %s", filePath, lm.LineNumber, msg)
+	}
+
+	msg = " " + levelPrefix[lm.Level] + " " + msg
 	return msg
 }

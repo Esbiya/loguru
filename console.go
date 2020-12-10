@@ -18,7 +18,7 @@ type consoleWriter struct {
 }
 
 func (c *consoleWriter) Format(lm *LogMsg) string {
-	msg := lm.OldStyleFormat()
+	msg := lm.ColorStyleFormat()
 	if c.Colorful {
 		msg = strings.Replace(msg, levelPrefix[lm.Level], colors[lm.Level](levelPrefix[lm.Level]), 1)
 	}
@@ -67,11 +67,8 @@ func (c *consoleWriter) WriteMsg(lm *LogMsg) error {
 		return nil
 	}
 	msg := c.formatter.Format(lm)
-	c.lg.writeln(msg)
+	_, _ = c.lg.writeln(msg)
 	return nil
-}
-
-func (c *consoleWriter) SetOnlineLogger(o OnlineLogger) {
 }
 
 func (c *consoleWriter) Destroy() {

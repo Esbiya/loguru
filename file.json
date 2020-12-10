@@ -1,0 +1,9 @@
+{
+    "filename": "logs/test.log",
+    "maxLines": 10000,
+    "maxsize": 1024,
+    "daily": true,
+    "maxDays": 15,
+    "rotate": true,
+    "perm": "0600"
+}
