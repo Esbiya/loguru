@@ -3,7 +3,7 @@ package loguru
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/pkg/errors"
+	errors1 "github.com/pkg/errors"
 	"github.com/shiena/ansicolor"
 	"os"
 	"strings"
@@ -55,7 +55,7 @@ func (c *consoleWriter) Init(config string) error {
 	if res == nil && len(c.Formatter) > 0 {
 		fmtr, ok := GetFormatter(c.Formatter)
 		if !ok {
-			return errors.New(fmt.Sprintf("the formatter with name: %s not found", c.Formatter))
+			return errors1.New(fmt.Sprintf("the formatter with name: %s not found", c.Formatter))
 		}
 		c.formatter = fmtr
 	}
