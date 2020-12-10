@@ -213,6 +213,7 @@ func (bl *MyLogger) writeMsg(logLevel int, msg string, v ...interface{}) error {
 	bl.lock.Lock()
 	switch bl.mode {
 	case 1:
+		bl.loggerFuncCallDepth = 4
 		_ = bl.setLogger(AdapterConsole)
 	case 2:
 		executePath, _ := os.Getwd()
