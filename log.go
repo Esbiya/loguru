@@ -101,7 +101,7 @@ func NewLogger(mode int, channelLens ...int64) *MyLogger {
 	bl.mode = mode
 	bl.level = LevelDebug
 	bl.enableFuncCallDepth = true
-	bl.loggerFuncCallDepth = 2
+	bl.loggerFuncCallDepth = 3
 	bl.msgChanLen = append(channelLens, 0)[0]
 	if bl.msgChanLen <= 0 {
 		bl.msgChanLen = defaultAsyncMsgLen
@@ -213,7 +213,6 @@ func (bl *MyLogger) writeMsg(logLevel int, msg string, v ...interface{}) error {
 	bl.lock.Lock()
 	switch bl.mode {
 	case 1:
-		bl.loggerFuncCallDepth = 3
 		_ = bl.setLogger(AdapterConsole)
 	case 2:
 		executePath, _ := os.Getwd()
