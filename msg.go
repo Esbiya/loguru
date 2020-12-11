@@ -44,7 +44,7 @@ func (lm *LogMsg) ColorStyleFormat() string {
 	msg2 := strings.Replace(msg, msg1[0], "", 1)
 
 	space := " "
-	for i := 0; i < 20-(len(msg1[0])); i++ {
+	for i := 0; i < 18-(len(msg1[0])); i++ {
 		space += " "
 	}
 	msg3 := fmt.Sprintf("%s%s ▶  ", msg1[0], space)
