@@ -19,7 +19,7 @@ type PatternLogFormatter struct {
 func (p *PatternLogFormatter) getWhenFormatter() string {
 	s := p.WhenFormat
 	if s == "" {
-		s = "2006/01/02 15:04:05.123" // default style
+		s = "2006/01/02 15:04:05.123"
 	}
 	return s
 }
