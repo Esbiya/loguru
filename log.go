@@ -584,3 +584,46 @@ func DelLogger(name string) error {
 	}
 	return nil
 }
+
+func SetColor(level int, color string) {
+	colors = append(colors[:level], colors[level+1:]...)
+	after := append([]brush{}, colors[level:]...)
+	colors = append(colors[0:level], newBrush(color))
+	colors = append(colors, after...)
+}
+
+func ResetEmergencyColor(color string) {
+	SetColor(LevelEmergency, color)
+}
+
+func ResetAlertColor(color string) {
+	SetColor(LevelAlert, color)
+}
+
+func ResetCriticalColor(color string) {
+	SetColor(LevelCritical, color)
+}
+
+func ResetErrorColor(color string) {
+	SetColor(LevelError, color)
+}
+
+func ResetWarningColor(color string) {
+	SetColor(LevelWarning, color)
+}
+
+func ResetSuccessColor(color string) {
+	SetColor(LevelSuccess, color)
+}
+
+func ResetNoticeColor(color string) {
+	SetColor(LevelNotice, color)
+}
+
+func ResetInfoColor(color string) {
+	SetColor(LevelInfo, color)
+}
+
+func ResetDebugColor(color string) {
+	SetColor(LevelDebug, color)
+}
