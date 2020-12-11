@@ -19,6 +19,7 @@ const (
 	LevelCritical
 	LevelError
 	LevelWarning
+	LevelSuccess
 	LevelNotice
 	LevelInformational
 	LevelDebug
@@ -27,12 +28,11 @@ const (
 const levelLoggerImpl = -1
 
 const (
-	AdapterConsole   = "console"
-	AdapterFile      = "file"
-	AdapterOnline    = "online"
-	AdapterMultiFile = "multifile"
-	AdapterMail      = "smtp"
-	AdapterConn      = "conn"
+	AdapterConsole = "console"
+	AdapterFile    = "file"
+	AdapterOnline  = "online"
+	AdapterMail    = "smtp"
+	AdapterConn    = "conn"
 )
 
 const (
@@ -58,8 +58,8 @@ type Logger interface {
 }
 
 var adapters = make(map[string]newLoggerFunc)
-var levelPrefix = [LevelDebug + 1]string{"Emergency", "ALERT", "CRITICAL", "ERROR", "WARNING", "NOTICE", "INFO", "DEBUG"}
-var levelNames = [...]string{"emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"}
+var levelPrefix = [LevelDebug + 1]string{"EMERGENCY", "ALERT", "CRITICAL", "ERROR", "WARNING", "SUCCESS", "NOTICE", "INFO", "DEBUG"}
+var levelNames = [...]string{"emergency", "alert", "critical", "error", "warning", "notice", "info", "debug", "success"}
 
 func Register(name string, log newLoggerFunc) {
 	if log == nil {
@@ -71,7 +71,7 @@ func Register(name string, log newLoggerFunc) {
 	adapters[name] = log
 }
 
-type MyLogger struct {
+type Loguru struct {
 	lock                sync.Mutex
 	level               int
 	init                bool
@@ -96,8 +96,8 @@ type nameLogger struct {
 
 var logMsgPool *sync.Pool
 
-func NewLogger(mode int, channelLens ...int64) *MyLogger {
-	bl := new(MyLogger)
+func NewLogger(mode int, channelLens ...int64) *Loguru {
+	bl := new(Loguru)
 	bl.mode = mode
 	bl.level = LevelDebug
 	bl.enableFuncCallDepth = true
@@ -110,7 +110,7 @@ func NewLogger(mode int, channelLens ...int64) *MyLogger {
 	return bl
 }
 
-func (bl *MyLogger) Async(msgLen ...int64) *MyLogger {
+func (bl *Loguru) Async(msgLen ...int64) *Loguru {
 	bl.lock.Lock()
 	defer bl.lock.Unlock()
 	if bl.asynchronous {
@@ -131,7 +131,7 @@ func (bl *MyLogger) Async(msgLen ...int64) *MyLogger {
 	return bl
 }
 
-func (bl *MyLogger) setLogger(adapterName string, configs ...string) error {
+func (bl *Loguru) setLogger(adapterName string, configs ...string) error {
 	config := append(configs, "{}")[0]
 	for _, l := range bl.outputs {
 		if l.name == adapterName {
@@ -147,14 +147,14 @@ func (bl *MyLogger) setLogger(adapterName string, configs ...string) error {
 	lg := logAdapter()
 	err := lg.Init(config)
 	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, "logs.MyLogger.SetLogger: "+err.Error())
+		_, _ = fmt.Fprintln(os.Stderr, "loguru.SetLogger: "+err.Error())
 		return err
 	}
 	bl.outputs = append(bl.outputs, &nameLogger{name: adapterName, Logger: lg})
 	return nil
 }
 
-func (bl *MyLogger) SetLogger(adapterName string, configs ...string) error {
+func (bl *Loguru) SetLogger(adapterName string, configs ...string) error {
 	bl.lock.Lock()
 	defer bl.lock.Unlock()
 	if !bl.init {
@@ -164,7 +164,7 @@ func (bl *MyLogger) SetLogger(adapterName string, configs ...string) error {
 	return bl.setLogger(adapterName, configs...)
 }
 
-func (bl *MyLogger) DelLogger(adapterName string) error {
+func (bl *Loguru) DelLogger(adapterName string) error {
 	bl.lock.Lock()
 	defer bl.lock.Unlock()
 	var outputs []*nameLogger
@@ -182,7 +182,7 @@ func (bl *MyLogger) DelLogger(adapterName string) error {
 	return nil
 }
 
-func (bl *MyLogger) writeToLoggers(when time.Time, msg string, level int) {
+func (bl *Loguru) writeToLoggers(when time.Time, msg string, level int) {
 	for _, l := range bl.outputs {
 		err := l.WriteMsg(&LogMsg{
 			When:  when,
@@ -195,7 +195,7 @@ func (bl *MyLogger) writeToLoggers(when time.Time, msg string, level int) {
 	}
 }
 
-func (bl *MyLogger) Write(p []byte) (n int, err error) {
+func (bl *Loguru) Write(p []byte) (n int, err error) {
 	if len(p) == 0 {
 		return 0, nil
 	}
@@ -209,7 +209,7 @@ func (bl *MyLogger) Write(p []byte) (n int, err error) {
 	return 0, err
 }
 
-func (bl *MyLogger) writeMsg(logLevel int, msg string, v ...interface{}) error {
+func (bl *Loguru) writeMsg(logLevel int, msg string, v ...interface{}) error {
 	bl.lock.Lock()
 	switch bl.mode {
 	case EnableConsole:
@@ -257,31 +257,31 @@ func (bl *MyLogger) writeMsg(logLevel int, msg string, v ...interface{}) error {
 	return nil
 }
 
-func (bl *MyLogger) SetLevel(l int) {
+func (bl *Loguru) SetLevel(l int) {
 	bl.level = l
 }
 
-func (bl *MyLogger) GetLevel() int {
+func (bl *Loguru) GetLevel() int {
 	return bl.level
 }
 
-func (bl *MyLogger) SetLogFuncCallDepth(d int) {
+func (bl *Loguru) SetLogFuncCallDepth(d int) {
 	bl.loggerFuncCallDepth = d
 }
 
-func (bl *MyLogger) GetLogFuncCallDepth() int {
+func (bl *Loguru) GetLogFuncCallDepth() int {
 	return bl.loggerFuncCallDepth
 }
 
-func (bl *MyLogger) EnableFuncCallDepth(b bool) {
+func (bl *Loguru) EnableFuncCallDepth(b bool) {
 	bl.enableFuncCallDepth = b
 }
 
-func (bl *MyLogger) SetPrefix(s string) {
+func (bl *Loguru) SetPrefix(s string) {
 	bl.prefix = s
 }
 
-func (bl *MyLogger) startLogger() {
+func (bl *Loguru) startLogger() {
 	gameOver := false
 	for {
 		select {
@@ -305,84 +305,91 @@ func (bl *MyLogger) startLogger() {
 	}
 }
 
-func (bl *MyLogger) Emergency(format string, v ...interface{}) {
+func (bl *Loguru) Emergency(format string, v ...interface{}) {
 	if LevelEmergency > bl.level {
 		return
 	}
 	_ = bl.writeMsg(LevelEmergency, format, v...)
 }
 
-func (bl *MyLogger) Alert(format string, v ...interface{}) {
+func (bl *Loguru) Alert(format string, v ...interface{}) {
 	if LevelAlert > bl.level {
 		return
 	}
 	_ = bl.writeMsg(LevelAlert, format, v...)
 }
 
-func (bl *MyLogger) Critical(format string, v ...interface{}) {
+func (bl *Loguru) Critical(format string, v ...interface{}) {
 	if LevelCritical > bl.level {
 		return
 	}
 	_ = bl.writeMsg(LevelCritical, format, v...)
 }
 
-func (bl *MyLogger) Error(format string, v ...interface{}) {
+func (bl *Loguru) Error(format string, v ...interface{}) {
 	if LevelError > bl.level {
 		return
 	}
 	_ = bl.writeMsg(LevelError, format, v...)
 }
 
-func (bl *MyLogger) Warning(format string, v ...interface{}) {
+func (bl *Loguru) Warning(format string, v ...interface{}) {
 	if LevelWarn > bl.level {
 		return
 	}
 	_ = bl.writeMsg(LevelWarn, format, v...)
 }
 
-func (bl *MyLogger) Notice(format string, v ...interface{}) {
+func (bl *Loguru) Notice(format string, v ...interface{}) {
 	if LevelNotice > bl.level {
 		return
 	}
 	_ = bl.writeMsg(LevelNotice, format, v...)
 }
 
-func (bl *MyLogger) Informational(format string, v ...interface{}) {
+func (bl *Loguru) Informational(format string, v ...interface{}) {
 	if LevelInfo > bl.level {
 		return
 	}
 	_ = bl.writeMsg(LevelInfo, format, v...)
 }
 
-func (bl *MyLogger) Debug(format string, v ...interface{}) {
+func (bl *Loguru) Debug(format string, v ...interface{}) {
 	if LevelDebug > bl.level {
 		return
 	}
 	_ = bl.writeMsg(LevelDebug, format, v...)
 }
 
-func (bl *MyLogger) Warn(format string, v ...interface{}) {
+func (bl *Loguru) Warn(format string, v ...interface{}) {
 	if LevelWarn > bl.level {
 		return
 	}
 	_ = bl.writeMsg(LevelWarn, format, v...)
 }
 
-func (bl *MyLogger) Info(format string, v ...interface{}) {
+func (bl *Loguru) Info(format string, v ...interface{}) {
 	if LevelInfo > bl.level {
 		return
 	}
 	_ = bl.writeMsg(LevelInfo, format, v...)
 }
 
-func (bl *MyLogger) Trace(format string, v ...interface{}) {
+func (bl *Loguru) Success(format string, v ...interface{}) {
+	if LevelSuccess > bl.level {
+		return
+	}
+	_ = bl.writeMsg(LevelSuccess, format, v...)
+}
+
+func (bl *Loguru) Trace(format string, v ...interface{}) {
 	if LevelDebug > bl.level {
 		return
 	}
 	_ = bl.writeMsg(LevelDebug, format, v...)
 }
 
-func (bl *MyLogger) Flush() {
+func (bl *Loguru) Flush() {
 	if bl.asynchronous {
 		bl.signalChan <- "flush"
 		bl.wg.Wait()
@@ -392,7 +399,7 @@ func (bl *MyLogger) Flush() {
 	bl.flush()
 }
 
-func (bl *MyLogger) Close() {
+func (bl *Loguru) Close() {
 	if bl.asynchronous {
 		bl.signalChan <- "close"
 		bl.wg.Wait()
@@ -407,7 +414,7 @@ func (bl *MyLogger) Close() {
 	close(bl.signalChan)
 }
 
-func (bl *MyLogger) Reset() {
+func (bl *Loguru) Reset() {
 	bl.Flush()
 	for _, l := range bl.outputs {
 		l.Destroy()
@@ -415,7 +422,7 @@ func (bl *MyLogger) Reset() {
 	bl.outputs = nil
 }
 
-func (bl *MyLogger) flush() {
+func (bl *Loguru) flush() {
 	if bl.asynchronous {
 		for {
 			if len(bl.msgChan) > 0 {
@@ -434,7 +441,7 @@ func (bl *MyLogger) flush() {
 
 var logger = NewLogger(EnableConsole)
 
-func GetLgLogger() *MyLogger {
+func GetLgLogger() *Loguru {
 	return logger
 }
 
@@ -471,7 +478,7 @@ func Reset() {
 	logger.Reset()
 }
 
-func Async(msgLen ...int64) *MyLogger {
+func Async(msgLen ...int64) *Loguru {
 	return logger.Async(msgLen...)
 }
 
@@ -538,6 +545,10 @@ func Info(f interface{}, v ...interface{}) {
 
 func Debug(f interface{}, v ...interface{}) {
 	logger.Debug(formatLog(f, v...))
+}
+
+func Success(f interface{}, v ...interface{}) {
+	logger.Success(formatLog(f, v...))
 }
 
 func Trace(f interface{}, v ...interface{}) {
