@@ -42,7 +42,13 @@ func (lm *LogMsg) ColorStyleFormat() string {
 	}
 	msg1 := strings.Split(msg, " ")
 	msg2 := strings.Replace(msg, msg1[0], "", 1)
-	msg = lm.Prefix + colors[3](c1) + colors[5](fmt.Sprintf("%s ▶  ", msg1[0])) + colors[lm.Level](msg2)
+
+	space := " "
+	for i := 0; i < 20-(len(msg1[0])); i++ {
+		space += " "
+	}
+	msg3 := fmt.Sprintf("%s%s ▶  ", msg1[0], space)
+	msg = lm.Prefix + colors[3](c1) + colors[5](msg3) + colors[lm.Level](msg2)
 
 	if lm.enableFuncCallDepth {
 		filePath := lm.FilePath
