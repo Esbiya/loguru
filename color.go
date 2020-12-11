@@ -2,6 +2,26 @@ package loguru
 
 type brush func(string) string
 
+const (
+	BLACK   = "1;30"
+	RED     = "1;31"
+	GREEN   = "1;32"
+	YELLOW  = "1;33"
+	BLUE    = "1;34"
+	FUCHSIA = "1;35"
+	CYAN    = "1;36"
+	WHITE   = "1;38"
+
+	BackBLACK   = "1;40"
+	BackRED     = "1;41"
+	BackGREEN   = "1;42"
+	BackYELLOW  = "1;43"
+	BackBLUE    = "1;44"
+	BackFUCHSIA = "1;45"
+	BackCYAN    = "1;46"
+	BackWHITE   = "1;47"
+)
+
 func newBrush(color string) brush {
 	pre := "\033["
 	reset := "\033[0m"
@@ -10,45 +30,96 @@ func newBrush(color string) brush {
 	}
 }
 
+var colorsMap = map[string]brush{
+	"black":       newBrush(BLACK),
+	"red":         newBrush(RED),
+	"green":       newBrush(GREEN),
+	"yellow":      newBrush(YELLOW),
+	"fuchsia":     newBrush(FUCHSIA),
+	"cyan":        newBrush(CYAN),
+	"blue":        newBrush(BLUE),
+	"white":       newBrush(WHITE),
+	"backBlack":   newBrush(BackBLACK),
+	"backRed":     newBrush(BackRED),
+	"backGreen":   newBrush(BackGREEN),
+	"backYellow":  newBrush(BackYELLOW),
+	"backFuchsia": newBrush(BackFUCHSIA),
+	"backCyan":    newBrush(BackCYAN),
+	"backBlue":    newBrush(BackBLUE),
+	"backWhite":   newBrush(BackWHITE),
+}
+
 var colors = []brush{
-	newBrush("1;41"), // Emergency          white
-	newBrush("1;36"), // Alert              cyan
-	newBrush("1;35"), // Critical           magenta
-	newBrush("1;31"), // Error              red
-	newBrush("1;33"), // Warning            yellow
-	newBrush("1;32"), // Notice             green
-	newBrush("1;38"), // Informational      blue
-	newBrush("1;34"), // Debug              Background blue
+	colorsMap["backRed"], // Emergency          backRed
+	colorsMap["cyan"],    // Alert              cyan
+	colorsMap["fuchsia"], // Critical           fuchsia
+	colorsMap["red"],     // Error              red
+	colorsMap["yellow"],  // Warning            yellow
+	colorsMap["green"],   // Notice             green
+	colorsMap["white"],   // Informational      white
+	colorsMap["blue"],    // Debug              blue
 }
 
-func White(text string) string {
-	return colors[0](text)
+func Black(text string) string {
+	return colorsMap["black"](text)
 }
 
-func Cyan(text string) string {
-	return colors[1](text)
-}
-
-func Magenta(text string) string {
-	return colors[2](text)
+func BackBlack(text string) string {
+	return colorsMap["backBlack"](text)
 }
 
 func Red(text string) string {
-	return colors[3](text)
+	return colorsMap["red"](text)
 }
 
-func Yellow(text string) string {
-	return colors[4](text)
+func BackRed(text string) string {
+	return colorsMap["backRed"](text)
 }
 
 func Green(text string) string {
-	return colors[5](text)
+	return colorsMap["green"](text)
+}
+
+func BackGreen(text string) string {
+	return colorsMap["backGreen"](text)
+}
+
+func Yellow(text string) string {
+	return colorsMap["yellow"](text)
+}
+
+func BackYellow(text string) string {
+	return colorsMap["backYellow"](text)
+}
+
+func Fuchsia(text string) string {
+	return colorsMap["fuchsia"](text)
+}
+
+func BackFuchsia(text string) string {
+	return colorsMap["backFuchsia"](text)
+}
+
+func White(text string) string {
+	return colorsMap["white"](text)
+}
+
+func Cyan(text string) string {
+	return colorsMap["cyan"](text)
 }
 
 func Blue(text string) string {
-	return colors[6](text)
+	return colorsMap["blue"](text)
 }
 
 func BackBlue(text string) string {
-	return colors[7](text)
+	return colorsMap["backBlue"](text)
+}
+
+func BackCyan(text string) string {
+	return colorsMap["backCyan"](text)
+}
+
+func BackWhite(text string) string {
+	return colorsMap["backWhite"](text)
 }
