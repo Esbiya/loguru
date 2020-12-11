@@ -627,3 +627,11 @@ func ResetInfoColor(color string) {
 func ResetDebugColor(color string) {
 	SetColor(LevelDebug, color)
 }
+
+func ResetTimeColor(color string) {
+	timeColor = newBrush(color)
+}
+
+func ResetFileColor(color string) {
+	fileColor = newBrush(color)
+}

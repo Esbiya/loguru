@@ -61,6 +61,11 @@ var colors = []brush{
 	colorsMap["fuchsia"],   // Debug              fuchsia
 }
 
+var (
+	timeColor = colorsMap["white"]
+	fileColor = colorsMap["white"]
+)
+
 func Black(text string) string {
 	return colorsMap["black"](text)
 }

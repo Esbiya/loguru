@@ -23,7 +23,7 @@ func (c *consoleWriter) Format(lm *LogMsg) string {
 		msg = strings.Replace(msg, levelPrefix[lm.Level], colors[lm.Level](levelPrefix[lm.Level]), 1)
 	}
 	h, _, _ := formatTimeHeader(lm.When)
-	bytes := append(append([]byte(colorsMap["white"](string(h))), colorsMap["red"](" |  ")...), msg...)
+	bytes := append(append([]byte(timeColor(string(h))), colorsMap["red"](" |  ")...), msg...)
 	return string(bytes)
 }
 

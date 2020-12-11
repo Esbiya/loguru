@@ -48,7 +48,7 @@ func (lm *LogMsg) ColorStyleFormat() string {
 		space += " "
 	}
 	msg3 := fmt.Sprintf("%s%s ▶  ", msg1[0], space)
-	msg = lm.Prefix + colorsMap["red"](c1) + colorsMap["white"](msg3) + colors[lm.Level](msg2)
+	msg = lm.Prefix + colorsMap["red"](c1) + fileColor(msg3) + colors[lm.Level](msg2)
 
 	if lm.enableFuncCallDepth {
 		filePath := lm.FilePath
