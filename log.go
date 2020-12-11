@@ -42,9 +42,9 @@ const (
 )
 
 const (
-	Console    = 1
-	OnlineLog  = 2
-	Write2File = 3
+	EnableConsole   = 1
+	EnableFileLog   = 2
+	EnableOnlineLog = 3
 )
 
 type newLoggerFunc func() Logger
@@ -212,14 +212,14 @@ func (bl *MyLogger) Write(p []byte) (n int, err error) {
 func (bl *MyLogger) writeMsg(logLevel int, msg string, v ...interface{}) error {
 	bl.lock.Lock()
 	switch bl.mode {
-	case 1:
+	case EnableConsole:
 		bl.loggerFuncCallDepth = 4
 		_ = bl.setLogger(AdapterConsole)
-	case 2:
+	case EnableFileLog:
 		executePath, _ := os.Getwd()
 		configBytes, _ := ioutil.ReadFile(executePath + "/logs/file.json")
 		_ = bl.setLogger(AdapterFile, string(configBytes))
-	case 3:
+	case EnableOnlineLog:
 		executePath, _ := os.Getwd()
 		configBytes, _ := ioutil.ReadFile(executePath + "/logs/online.json")
 		_ = bl.setLogger(AdapterOnline, string(configBytes))
@@ -432,7 +432,7 @@ func (bl *MyLogger) flush() {
 	}
 }
 
-var logger = NewLogger(1)
+var logger = NewLogger(EnableConsole)
 
 func GetLgLogger() *MyLogger {
 	return logger
