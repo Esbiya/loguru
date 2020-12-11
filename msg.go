@@ -31,13 +31,13 @@ func (lm *LogMsg) ColorStyleFormat() string {
 	case 0:
 	case 2:
 		c1 = " " + c1
-	case 1, 3, 7:
+	case 1, 3, 8:
 		c1 = "    " + c1
-	case 4:
+	case 4, 5:
 		c1 = "  " + c1
-	case 5:
-		c1 = "   " + c1
 	case 6:
+		c1 = "   " + c1
+	case 7:
 		c1 = "     " + c1
 	}
 	msg1 := strings.Split(msg, " ")
