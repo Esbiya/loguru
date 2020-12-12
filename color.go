@@ -51,14 +51,14 @@ var colorsMap = map[string]brush{
 
 var colors = []brush{
 	colorsMap["backRed"],   // Emergency          backRed
-	colorsMap["backCyan"],  // Alert              cyan
+	colorsMap["backCyan"],  // Alert              backCyan
 	colorsMap["backBlue"],  // Critical           backBlue
 	colorsMap["red"],       // Error              red
 	colorsMap["yellow"],    // Warning            yellow
 	colorsMap["green"],     // Success            green
-	colorsMap["backGreen"], // Notice             green
-	colorsMap["blue"],      // Informational      blue
-	colorsMap["fuchsia"],   // Debug              fuchsia
+	colorsMap["backGreen"], // Notice             backGreen
+	colorsMap["white"],     // Informational      white
+	colorsMap["blue"],      // Debug              blue
 }
 
 var (

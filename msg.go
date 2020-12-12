@@ -19,13 +19,7 @@ type LogMsg struct {
 	enableFuncCallDepth bool
 }
 
-func (lm *LogMsg) ColorStyleFormat() string {
-	msg := lm.Msg
-
-	if len(lm.Args) > 0 {
-		lm.Msg = fmt.Sprintf(lm.Msg, lm.Args...)
-	}
-
+func ProcessSpace(lm *LogMsg) (string, string, string) {
 	c1 := " |  "
 	switch lm.Level {
 	case 0:
@@ -40,14 +34,25 @@ func (lm *LogMsg) ColorStyleFormat() string {
 	case 7:
 		c1 = "     " + c1
 	}
-	msg1 := strings.Split(msg, " ")
-	msg2 := strings.Replace(msg, msg1[0], "", 1)
+	msg1 := strings.Split(lm.Msg, " ")
+	msg2 := strings.Replace(lm.Msg, msg1[0], "", 1)
 
 	space := " "
 	for i := 0; i < 18-(len(msg1[0])); i++ {
 		space += " "
 	}
 	msg3 := fmt.Sprintf("%s%s ▶  ", msg1[0], space)
+	return c1, msg2, msg3
+}
+
+func (lm *LogMsg) ColorStyleFormat() string {
+	msg := lm.Msg
+
+	if len(lm.Args) > 0 {
+		lm.Msg = fmt.Sprintf(lm.Msg, lm.Args...)
+	}
+
+	c1, msg2, msg3 := ProcessSpace(lm)
 	msg = lm.Prefix + colorsMap["red"](c1) + fileColor(msg3) + colors[lm.Level](msg2)
 
 	if lm.enableFuncCallDepth {
@@ -69,6 +74,8 @@ func (lm *LogMsg) NormalFormat() string {
 		lm.Msg = fmt.Sprintf(lm.Msg, lm.Args...)
 	}
 
+	c1, msg2, msg3 := ProcessSpace(lm)
+
 	if lm.enableFuncCallDepth {
 		filePath := lm.FilePath
 		if !lm.enableFullFilePath {
@@ -77,6 +84,6 @@ func (lm *LogMsg) NormalFormat() string {
 		msg = fmt.Sprintf("[%s:%d] %s", filePath, lm.LineNumber, msg)
 	}
 
-	msg = " " + levelPrefix[lm.Level] + " " + msg
+	msg = "| " + levelPrefix[lm.Level] + c1 + msg3 + msg2
 	return msg
 }

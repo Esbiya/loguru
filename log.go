@@ -1,6 +1,7 @@
 package loguru
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -42,9 +43,9 @@ const (
 )
 
 const (
-	EnableConsole   = 1
-	EnableFileLog   = 2
-	EnableOnlineLog = 3
+	Console   = 1
+	FileLog   = 2
+	OnlineLog = 3
 )
 
 type newLoggerFunc func() Logger
@@ -212,14 +213,14 @@ func (bl *Loguru) Write(p []byte) (n int, err error) {
 func (bl *Loguru) writeMsg(logLevel int, msg string, v ...interface{}) error {
 	bl.lock.Lock()
 	switch bl.mode {
-	case EnableConsole:
+	case Console:
 		bl.loggerFuncCallDepth = 4
 		_ = bl.setLogger(AdapterConsole)
-	case EnableFileLog:
+	case FileLog:
 		executePath, _ := os.Getwd()
 		configBytes, _ := ioutil.ReadFile(executePath + "/logs/file.json")
 		_ = bl.setLogger(AdapterFile, string(configBytes))
-	case EnableOnlineLog:
+	case OnlineLog:
 		executePath, _ := os.Getwd()
 		configBytes, _ := ioutil.ReadFile(executePath + "/logs/online.json")
 		_ = bl.setLogger(AdapterOnline, string(configBytes))
@@ -439,7 +440,7 @@ func (bl *Loguru) flush() {
 	}
 }
 
-var logger = NewLogger(EnableConsole)
+var logger = NewLogger(Console)
 
 func GetLgLogger() *Loguru {
 	return logger
@@ -634,4 +635,40 @@ func ResetTimeColor(color string) {
 
 func ResetFileColor(color string) {
 	fileColor = newBrush(color)
+}
+
+func Enable(mode int) error {
+	var err error
+	switch mode {
+	case FileLog:
+		executePath, _ := os.Getwd()
+		configBytes, err := ioutil.ReadFile(executePath + "/logs/file.json")
+		if err != nil {
+			return err
+		}
+		err = logger.setLogger(AdapterFile, string(configBytes))
+	case OnlineLog:
+		executePath, _ := os.Getwd()
+		configBytes, err := ioutil.ReadFile(executePath + "/logs/online.json")
+		if err != nil {
+			return err
+		}
+		err = logger.setLogger(AdapterOnline, string(configBytes))
+	default:
+		err = errors.New("unknown log type")
+	}
+	return err
+}
+
+func Disable(mode int) error {
+	var err error
+	switch mode {
+	case FileLog:
+		err = logger.DelLogger(AdapterFile)
+	case OnlineLog:
+		err = logger.DelLogger(AdapterOnline)
+	default:
+		err = errors.New("unknown log type")
+	}
+	return err
 }
