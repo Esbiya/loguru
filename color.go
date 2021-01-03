@@ -58,6 +58,7 @@ var colors = []brush{
 	colorsMap["green"],     // Success            green
 	colorsMap["backGreen"], // Notice             backGreen
 	colorsMap["white"],     // Informational      white
+	colorsMap["fuchsia"],   // Input              fuchsia
 	colorsMap["blue"],      // Debug              blue
 }
 

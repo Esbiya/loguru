@@ -23,6 +23,7 @@ const (
 	LevelSuccess
 	LevelNotice
 	LevelInformational
+	LevelInput
 	LevelDebug
 )
 
@@ -59,8 +60,8 @@ type Logger interface {
 }
 
 var adapters = make(map[string]newLoggerFunc)
-var levelPrefix = [LevelDebug + 1]string{"EMERGENCY", "ALERT", "CRITICAL", "ERROR", "WARNING", "SUCCESS", "NOTICE", "INFO", "DEBUG"}
-var levelNames = [...]string{"emergency", "alert", "critical", "error", "warning", "notice", "info", "debug", "success"}
+var levelPrefix = [LevelDebug + 1]string{"EMERGENCY", "ALERT", "CRITICAL", "ERROR", "WARNING", "SUCCESS", "NOTICE", "INFO", "INPUT", "DEBUG"}
+var levelNames = [...]string{"emergency", "alert", "critical", "error", "warning", "notice", "info", "debug", "input", "success"}
 
 func Register(name string, log newLoggerFunc) {
 	if log == nil {
@@ -383,6 +384,13 @@ func (bl *Loguru) Success(format string, v ...interface{}) {
 	_ = bl.writeMsg(LevelSuccess, format, v...)
 }
 
+func (bl *Loguru) Input(format string, v ...interface{}) {
+	if LevelDebug > bl.level {
+		return
+	}
+	_ = bl.writeMsg(LevelInput, format, v...)
+}
+
 func (bl *Loguru) Trace(format string, v ...interface{}) {
 	if LevelDebug > bl.level {
 		return
@@ -554,6 +562,10 @@ func Success(f interface{}, v ...interface{}) {
 
 func Trace(f interface{}, v ...interface{}) {
 	logger.Trace(formatLog(f, v...))
+}
+
+func Input(f interface{}, v ...interface{}) {
+	logger.Input(formatLog(f, v...))
 }
 
 func formatLog(f interface{}, v ...interface{}) string {

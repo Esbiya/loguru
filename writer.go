@@ -16,6 +16,13 @@ func newLogWriter(wr io.Writer) *logWriter {
 	return &logWriter{writer: wr}
 }
 
+func (lg *logWriter) write(msg string) (int, error) {
+	lg.Lock()
+	n, err := lg.writer.Write([]byte(msg))
+	lg.Unlock()
+	return n, err
+}
+
 func (lg *logWriter) writeln(msg string) (int, error) {
 	lg.Lock()
 	msg += "\n"

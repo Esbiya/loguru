@@ -67,7 +67,11 @@ func (c *consoleWriter) WriteMsg(lm *LogMsg) error {
 		return nil
 	}
 	msg := c.formatter.Format(lm)
-	_, _ = c.lg.writeln(msg)
+	if lm.Level == LevelInput {
+		_, _ = c.lg.write(msg)
+	} else {
+		_, _ = c.lg.writeln(msg)
+	}
 	return nil
 }
 
