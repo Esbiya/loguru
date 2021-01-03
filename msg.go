@@ -25,7 +25,7 @@ func ProcessSpace(lm *LogMsg) (string, string, string) {
 	case 0:
 	case 2:
 		c1 = " " + c1
-	case 1, 3, 8:
+	case 1, 3, 8, 9:
 		c1 = "    " + c1
 	case 4, 5:
 		c1 = "  " + c1
