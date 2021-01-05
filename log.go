@@ -74,6 +74,7 @@ func Register(name string, log newLoggerFunc) {
 }
 
 type Loguru struct {
+	space               int
 	lock                sync.Mutex
 	level               int
 	init                bool
@@ -109,6 +110,7 @@ func NewLogger(mode int, channelLens ...int64) *Loguru {
 		bl.msgChanLen = defaultAsyncMsgLen
 	}
 	bl.signalChan = make(chan string, 1)
+	bl.space = 18
 	return bl
 }
 
@@ -187,6 +189,7 @@ func (bl *Loguru) DelLogger(adapterName string) error {
 func (bl *Loguru) writeToLoggers(when time.Time, msg string, level int) {
 	for _, l := range bl.outputs {
 		err := l.WriteMsg(&LogMsg{
+			Space: bl.space,
 			When:  when,
 			Msg:   msg,
 			Level: level,
@@ -647,6 +650,10 @@ func ResetTimeColor(color string) {
 
 func ResetFileColor(color string) {
 	fileColor = newBrush(color)
+}
+
+func ResetSpace(space int) {
+	logger.space = space
 }
 
 func Enable(mode int) error {
