@@ -236,7 +236,6 @@ func (bl *Loguru) writeMsg(logLevel int, msg string, v ...interface{}) error {
 
 	when := time.Now()
 	if bl.enableFuncCallDepth {
-		log.Println(bl.loggerFuncCallDepth)
 		_, file, line, ok := runtime.Caller(bl.loggerFuncCallDepth)
 		if !ok {
 			file = "???"
