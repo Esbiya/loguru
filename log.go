@@ -566,8 +566,11 @@ func Trace(f interface{}, v ...interface{}) {
 	logger.Trace(formatLog(f, v...))
 }
 
-func Input(f interface{}, v ...interface{}) {
+func Input(f interface{}, v ...interface{}) string {
+	var r string
 	logger.Input(formatLog(f, v...))
+	fmt.Scanf("%s", &r)
+	return r
 }
 
 func formatLog(f interface{}, v ...interface{}) string {
