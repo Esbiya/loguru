@@ -1,3 +1,11 @@
+/*
+ * @Author: your name
+ * @Date: 2020-12-10 10:26:15
+ * @LastEditTime: 2021-03-27 09:56:38
+ * @LastEditors: your name
+ * @Description: In User Settings Edit
+ * @FilePath: /loguru/online.go
+ */
 package loguru
 
 import (

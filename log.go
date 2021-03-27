@@ -1,6 +1,7 @@
 package loguru
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -659,26 +660,40 @@ func ResetSpace(space int) {
 }
 
 func Enable(mode int) error {
-	var err error
 	switch mode {
 	case FileLog:
+		if !IsDir("./logs/") {
+			_ = os.Mkdir("./logs/", 0777)
+		}
+		if !Exists("./logs/file.json") {
+			f, _ := os.Create("./logs/file.json")
+			data, _ := json.MarshalIndent(map[string]interface{}{
+				"filename": "logs/out.log",
+				"maxLines": 10000,
+				"maxsize":  5242880,
+				"daily":    true,
+				"maxDays":  7,
+				"rotate":   true,
+				"perm":     "0600",
+			}, "", "    ")
+			_, _ = f.Write(data)
+		}
 		executePath, _ := os.Getwd()
 		configBytes, err := ioutil.ReadFile(executePath + "/logs/file.json")
 		if err != nil {
 			return err
 		}
-		err = logger.setLogger(AdapterFile, string(configBytes))
+		return logger.setLogger(AdapterFile, string(configBytes))
 	case OnlineLog:
 		executePath, _ := os.Getwd()
 		configBytes, err := ioutil.ReadFile(executePath + "/logs/online.json")
 		if err != nil {
 			return err
 		}
-		err = logger.setLogger(AdapterOnline, string(configBytes))
+		return logger.setLogger(AdapterOnline, string(configBytes))
 	default:
-		err = errors.New("unknown log type")
+		return errors.New("unknown log type")
 	}
-	return err
 }
 
 func Disable(mode int) error {
