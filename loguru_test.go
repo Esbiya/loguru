@@ -7,9 +7,9 @@ import (
 
 func TestLog(t *testing.T) {
 	// 终端输出
-	//ResetTimeColor(FUCHSIA)
-	//ResetDebugColor(GREEN)
-	//Debug("111")
+	ResetTimeColor(FUCHSIA)
+	ResetDebugColor(GREEN)
+	Debug("111")
 
 	// 写入文件
 	//logger := NewLogger(FileLog)
@@ -24,4 +24,7 @@ func TestLog(t *testing.T) {
 	//logger.Debug("嘿嘿嘿")
 	x := Input("请输入: ")
 	log.Println(x)
+
+	y := Input("请输入2: ")
+	log.Println(y)
 }

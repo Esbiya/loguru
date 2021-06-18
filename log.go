@@ -570,7 +570,7 @@ func Trace(f interface{}, v ...interface{}) {
 func Input(f interface{}, v ...interface{}) string {
 	var r string
 	logger.Input(formatLog(f, v...))
-	fmt.Scanf("%s", &r)
+	fmt.Scanln(&r)
 	return r
 }
 
